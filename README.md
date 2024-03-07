@@ -1,5 +1,6 @@
 # Terry Traffic Stops: Predicting Arrest Outcomes
 Author: Paul Mwangi
+
 This project is a part of the Data Science (DSF-FT) Course at Moringa School. The full project description can be found here.
 ## Overview
 In this project, we aim to build a binary classification model to predict whether an arrest was made after a Terry Stop. A Terry Stop refers to a brief detention by law enforcement officers based on reasonable suspicion, even in the absence of clear evidence for full-blown arrests. Our dataset includes information about the presence of weapons, time of day, and other relevant features.
