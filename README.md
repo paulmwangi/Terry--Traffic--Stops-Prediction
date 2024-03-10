@@ -62,10 +62,10 @@ Our project aims to provide actionable insights for law enforcement agencies, im
 
 ## Repository Structure
 
-* ├── data
+* ├── .ipynb_checkpoints
 * ├── images
-* ├── imports
+* ├── .gitignore
 * ├── README.md
-* ├── notebook.pdf
-* ├── presentation.pdf
-* └── terry_stops.ipynb
+* ├── Terry-Stops-Classification
+* ├── Terry-Stops.csv
+* └── presentation.pdf
