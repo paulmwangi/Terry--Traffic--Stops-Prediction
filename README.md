@@ -26,7 +26,7 @@ Law enforcement agencies need insights into the factors influencing arrest outco
 ## Data Understanding
 ### Data Description
 
-Our dataset is sourced from the Seattle Police Department's Terry Stops record.
+Our dataset is sourced from the Seattle Police Department's Terry Stops record.[a link](https://data.seattle.gov/Public-Safety/Terry-Stops/28ny-9ts8/about_data)
 This dataset includes the following features:
 - **Arrest Outcome**: Binary (1 for arrest made, 0 for no arrest).
 - **Presence of Weapons**: Whether weapons were found during the stop.
