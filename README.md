@@ -61,3 +61,11 @@ Our project aims to provide actionable insights for law enforcement agencies, im
 3. Promote transparency by sharing findings with stakeholders and the public.
 
 ## Repository Structure
+
+├── data
+├── images
+├── imports
+├── README.md
+├── notebook.pdf
+├── presentation.pdf
+└── terry_stops.ipynb
