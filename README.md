@@ -55,11 +55,8 @@ We will assess the model using the following metrics:
 ## Conclusion
 Our project aims to provide actionable insights for law enforcement agencies, improve decision-making during Terry Stops, and address potential bias. Transparency and ethical considerations will guide our analysis.
 
-## Recommendations
-1. Consider implementing model predictions in real-time during Terry Stops.
-2. Continuously monitor and evaluate the model's performance.
-3. Promote transparency by sharing findings with stakeholders and the public.
-
+## For More Information
+See the full analysis in the [Jupyter Notebook](https://github.com/paulmwangi/Terry--Traffic--Stops-Prediction/blob/main/Terry-Stops-Classification.ipynb) or review this [presentation.](https://github.com/paulmwangi/Terry--Traffic--Stops-Prediction/blob/main/presentation.pdf)
 ## Repository Structure
 
 * ├── .ipynb_checkpoints
