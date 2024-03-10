@@ -25,7 +25,8 @@ Law enforcement agencies need insights into the factors influencing arrest outco
 
 ## Data Understanding
 ### Data Description
-Our dataset includes the following features:
+
+Our dataset is sourced from the Seattle Police Department's Terry Stops record. This dataset includes the following features:
 - **Arrest Outcome**: Binary (1 for arrest made, 0 for no arrest).
 - **Presence of Weapons**: Whether weapons were found during the stop.
 - **Time of Day**: Categorized into morning, afternoon, evening, and night.
