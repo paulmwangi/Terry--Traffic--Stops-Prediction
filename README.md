@@ -1,9 +1,9 @@
 # Terry Traffic Stops: Predicting Arrest Outcomes
-Author: Paul Mwangi
+Author: [Paul Mwangi](https://github.com/paulmwangi)
 
-This project is a part of the Data Science (DSF-FT) Course at Moringa School. The full project description can be found here.
+
 ## Overview
-In this project, we aim to build a binary classification model to predict whether an arrest was made after a Terry Stop. A Terry Stop refers to a brief detention by law enforcement officers based on reasonable suspicion, even in the absence of clear evidence for full-blown arrests. Our dataset includes information about the presence of weapons, time of day, and other relevant features.
+In the pivotal 1967-8 Supreme Court decision of Terry v. Ohio, it was determined that a police officer’s conduct of stopping and searching individuals based solely on suspicious behavior did not breach the Fourth Amendment’s protection against “unreasonable search and seizure.” This ruling gave rise to the concept of “reasonable suspicion,” a legal standard allowing police to briefly detain individuals without the more substantial proof necessary for formal arrests. “Terry Stops” refer to the practice of pulling over drivers under this suspicion.
 
 ## Business Understanding
 ### Problem Statement
@@ -59,3 +59,13 @@ Our project aims to provide actionable insights for law enforcement agencies, im
 1. Consider implementing model predictions in real-time during Terry Stops.
 2. Continuously monitor and evaluate the model's performance.
 3. Promote transparency by sharing findings with stakeholders and the public.
+
+##Repository Structure
+
+├── data
+├── images
+├── imports
+├── README.md
+├── notebook.pdf
+├── presentation.pdf
+└── terry_stops.ipynb
