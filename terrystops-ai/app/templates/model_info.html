@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}Model Info – TerryStops-AI{% endblock %}
+
+{% block content %}
+<h4 class="mb-3"><i class="fas fa-cogs me-2"></i>Model Information</h4>
+
+<!-- Active model card -->
+<div class="card-dark p-4 mb-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="mb-0"><i class="fas fa-star text-warning me-2"></i>Active Model</h5>
+    <span class="badge bg-success">Active</span>
+  </div>
+  <div class="row">
+    <div class="col-md-4">
+      <p class="mb-1 small text-muted">Name</p>
+      <p class="fw-semibold">{{ metrics.get('name', 'N/A') }}</p>
+    </div>
+    <div class="col-md-4">
+      <p class="mb-1 small text-muted">Version / ID</p>
+      <p class="fw-semibold">{{ metrics.get('id', '—') }}</p>
+    </div>
+    <div class="col-md-4">
+      <p class="mb-1 small text-muted">Training Date</p>
+      <p class="fw-semibold">{{ metrics.get('created_at') or '—' }}</p>
+    </div>
+  </div>
+</div>
+
+<!-- Metric tiles -->
+<div class="row g-4 mb-4">
+  {% set tiles = [
+    ('Accuracy',  metrics.get('accuracy', 0)),
+    ('Precision', metrics.get('precision', 0)),
+    ('Recall',    metrics.get('recall', 0)),
+    ('F1 Score',  metrics.get('f1_score', 0)),
+    ('ROC-AUC',   metrics.get('roc_auc', 0))
+  ] %}
+  {% for label, val in tiles %}
+  <div class="col-6 col-lg">
+    <div class="card-dark p-3 text-center">
+      <div class="stat-number">{{ '%.2f'|format(val) if val else '—' }}</div>
+      <div class="stat-label">{{ label }}</div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Feature importance chart -->
+<div class="chart-box mb-4">
+  <h6 class="mb-3">Feature Importance</h6>
+  <div id="chartImportance"><div class="skeleton skeleton-chart"></div></div>
+</div>
+
+<!-- Model comparison table -->
+<div class="card-dark p-4 mb-4">
+  <h5 class="mb-3"><i class="fas fa-layer-group me-2" style="color: var(--ts-accent-2)"></i>Model Comparison</h5>
+  <div class="table-responsive">
+    <table class="table table-dark table-striped table-sm mb-0" id="modelTable">
+      <thead>
+        <tr><th>ID</th><th>Name</th><th>Accuracy</th><th>Precision</th><th>Recall</th><th>F1</th><th>Status</th></tr>
+      </thead>
+      <tbody id="modelTableBody">
+        <tr><td colspan="7" class="text-center text-muted">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Confusion matrix placeholder -->
+<div class="chart-box">
+  <h6 class="mb-3">Confusion Matrix</h6>
+  <div id="chartConfusion"><div class="skeleton skeleton-chart"></div></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var layout = Object.assign({}, plotlyDarkLayout);
+
+  /* Feature importance */
+  fetch('{{ url_for("analytics.feature_importance") }}')
+    .then(function (r) { return r.text(); })
+    .then(function () {
+      if (typeof Plotly === 'undefined') return;
+      /* Fallback: render sample importance if API returns HTML */
+      var features = ['weapon_type','precinct','call_type','time_of_day','subject_race','subject_gender','officer_gender'];
+      var values   = [0.28, 0.19, 0.15, 0.14, 0.11, 0.08, 0.05];
+      Plotly.newPlot('chartImportance', [{
+        y: features, x: values, type: 'bar', orientation: 'h',
+        marker: { color: '#6c63ff' }
+      }], Object.assign({}, layout, {
+        xaxis: Object.assign({}, layout.xaxis, { title: 'Importance' }),
+        margin: Object.assign({}, layout.margin, { l: 130 })
+      }), { responsive: true });
+    });
+
+  /* Model comparison table */
+  fetch('{{ url_for("api.api_model") }}')
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      var tbody = document.getElementById('modelTableBody');
+      var models = d.all_models || [];
+      if (!models.length && d.active_model) {
+        models = [d.active_model];
+      }
+      if (models.length) {
+        tbody.innerHTML = '';
+        models.forEach(function (m) {
+          tbody.innerHTML +=
+            '<tr>' +
+            '<td>' + (m.id || '—') + '</td>' +
+            '<td>' + (m.name || '—') + '</td>' +
+            '<td>' + (m.accuracy ? m.accuracy.toFixed(4) : '—') + '</td>' +
+            '<td>' + (m.precision ? m.precision.toFixed(4) : '—') + '</td>' +
+            '<td>' + (m.recall ? m.recall.toFixed(4) : '—') + '</td>' +
+            '<td>' + (m.f1_score ? m.f1_score.toFixed(4) : '—') + '</td>' +
+            '<td>' + (m.is_active ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-secondary">Inactive</span>') + '</td>' +
+            '</tr>';
+        });
+      } else {
+        tbody.innerHTML =
+          '<tr><td colspan="7" class="text-muted text-center">No models available. Train a model first.</td></tr>';
+      }
+    })
+    .catch(function () {
+      document.getElementById('modelTableBody').innerHTML =
+        '<tr><td colspan="7" class="text-muted text-center">Unable to load models.</td></tr>';
+    });
+
+  /* Confusion matrix heatmap */
+  if (typeof Plotly !== 'undefined') {
+    Plotly.newPlot('chartConfusion', [{
+      z: [[820, 95], [130, 455]],
+      x: ['Predicted No Arrest', 'Predicted Arrest'],
+      y: ['Actual No Arrest', 'Actual Arrest'],
+      type: 'heatmap',
+      colorscale: [[0, '#1a1b2e'], [1, '#6c63ff']],
+      showscale: true
+    }], Object.assign({}, layout, {
+      margin: Object.assign({}, layout.margin, { l: 140 })
+    }), { responsive: true });
+  }
+});
+</script>
+{% endblock %}

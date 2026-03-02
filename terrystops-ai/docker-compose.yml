@@ -1,0 +1,32 @@
+version: "3.9"
+
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    volumes:
+      - ./data/raw:/app/data/raw
+    depends_on:
+      - db
+    networks:
+      - terrystops-net
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: terrystops
+      POSTGRES_PASSWORD: terrystops
+      POSTGRES_DB: terrystops
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - terrystops-net
+
+volumes:
+  postgres_data:
+
+networks:
+  terrystops-net:

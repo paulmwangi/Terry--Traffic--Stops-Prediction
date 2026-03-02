@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}Predict – TerryStops-AI{% endblock %}
+
+{% block content %}
+<h4 class="mb-3"><i class="fas fa-search me-2"></i>Arrest Outcome Prediction</h4>
+
+<!-- Step indicators -->
+<div class="step-indicators text-center mb-4">
+  <span class="step-dot active">1</span>
+  <span class="step-line"></span>
+  <span class="step-dot">2</span>
+  <span class="step-line"></span>
+  <span class="step-dot">3</span>
+</div>
+
+<form method="POST" action="{{ url_for('predict.predict') }}" id="predictForm">
+  {{ form.hidden_tag() }}
+
+  <!-- Step 1 – Stop Information -->
+  <div class="wizard-step active card-dark p-4 mb-3">
+    <h5 class="mb-3"><i class="fas fa-map-marker-alt me-2" style="color: var(--ts-accent-2)"></i>Stop Information</h5>
+    <div class="mb-3">
+      {{ form.precinct.label(class="form-label") }}
+      {{ form.precinct(class="form-select bg-dark text-light border-secondary") }}
+    </div>
+    <div class="mb-3">
+      {{ form.time_of_day.label(class="form-label") }}
+      {{ form.time_of_day(class="form-control bg-dark text-light border-secondary", placeholder="e.g. 14:30") }}
+    </div>
+    <div class="mb-3">
+      {{ form.call_type.label(class="form-label") }}
+      {{ form.call_type(class="form-select bg-dark text-light border-secondary") }}
+    </div>
+    <div class="text-end">
+      <button type="button" class="btn btn-accent btn-next">Next <i class="fas fa-arrow-right ms-1"></i></button>
+    </div>
+  </div>
+
+  <!-- Step 2 – Subject Information -->
+  <div class="wizard-step card-dark p-4 mb-3">
+    <h5 class="mb-3"><i class="fas fa-user me-2" style="color: var(--ts-accent-2)"></i>Subject Information</h5>
+    <div class="mb-3">
+      {{ form.subject_race.label(class="form-label") }}
+      {{ form.subject_race(class="form-select bg-dark text-light border-secondary") }}
+    </div>
+    <div class="mb-3">
+      {{ form.subject_gender.label(class="form-label") }}
+      {{ form.subject_gender(class="form-select bg-dark text-light border-secondary") }}
+    </div>
+    <div class="mb-3">
+      {{ form.weapon_type.label(class="form-label") }}
+      {{ form.weapon_type(class="form-select bg-dark text-light border-secondary") }}
+    </div>
+    <div class="d-flex justify-content-between">
+      <button type="button" class="btn btn-outline-light btn-prev"><i class="fas fa-arrow-left me-1"></i>Back</button>
+      <button type="button" class="btn btn-accent btn-next">Next <i class="fas fa-arrow-right ms-1"></i></button>
+    </div>
+  </div>
+
+  <!-- Step 3 – Officer Information -->
+  <div class="wizard-step card-dark p-4 mb-3">
+    <h5 class="mb-3"><i class="fas fa-id-badge me-2" style="color: var(--ts-accent-2)"></i>Officer Information</h5>
+    <div class="mb-3">
+      {{ form.officer_gender.label(class="form-label") }}
+      {{ form.officer_gender(class="form-select bg-dark text-light border-secondary") }}
+    </div>
+    <div class="d-flex justify-content-between">
+      <button type="button" class="btn btn-outline-light btn-prev"><i class="fas fa-arrow-left me-1"></i>Back</button>
+      <button type="submit" class="btn btn-accent"><i class="fas fa-search me-1"></i>Predict</button>
+    </div>
+  </div>
+</form>
+
+<!-- ── Result panel ───────────────────────────────────── -->
+{% if result %}
+<div id="predictionResult" class="result-panel p-4 mt-4" data-probability="{{ result.probability * 100 }}">
+  <div class="row align-items-center">
+    <div class="col-md-4 gauge-container">
+      <canvas id="gaugeCanvas" width="220" height="220"></canvas>
+    </div>
+    <div class="col-md-8">
+      <h5>
+        {% if result.prediction == 1 %}
+          <span class="badge bg-danger fs-6"><i class="fas fa-exclamation-triangle me-1"></i>Arrest Likely</span>
+        {% else %}
+          <span class="badge bg-success fs-6"><i class="fas fa-check-circle me-1"></i>No Arrest Expected</span>
+        {% endif %}
+      </h5>
+      <p class="text-muted mb-2">
+        The model estimates a <strong>{{ '%.1f'|format(result.probability * 100) }}%</strong> probability
+        of arrest given the provided stop characteristics.
+      </p>
+
+      {% if result.shap_values %}
+      <h6 class="mt-3 mb-2"><i class="fas fa-chart-bar me-1"></i>Top Feature Contributions</h6>
+      {% for feat, val in result.shap_values.items() %}
+      <div class="shap-row">
+        <span class="shap-label">{{ feat }}</span>
+        <div class="shap-track">
+          <div class="shap-fill {{ 'shap-bar-pos' if val > 0 else 'shap-bar-neg' }}"
+               style="width:{{ (val|abs * 100)|round }}%"></div>
+        </div>
+        <span class="ms-2 small">{{ '%.3f'|format(val) }}</span>
+      </div>
+      {% endfor %}
+      {% endif %}
+
+      <div class="mt-3 small text-muted">
+        <i class="fas fa-lightbulb me-1"></i>
+        <em>This prediction is based on historical patterns and should not be the sole basis for any enforcement decision.</em>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var panel = document.getElementById('predictionResult');
+  if (panel) {
+    var prob = parseFloat(panel.getAttribute('data-probability'));
+    drawGauge('gaugeCanvas', prob, 100);
+  }
+});
+</script>
+{% endblock %}

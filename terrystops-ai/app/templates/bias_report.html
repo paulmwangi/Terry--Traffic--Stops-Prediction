@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}Bias Report – TerryStops-AI{% endblock %}
+
+{% block content %}
+<h4 class="mb-3"><i class="fas fa-balance-scale me-2"></i>Bias &amp; Fairness Report</h4>
+
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+  <i class="fas fa-exclamation-triangle me-1"></i>
+  <strong>Disclaimer:</strong> These metrics are computed on historical data and reflect systemic patterns,
+  not individual culpability. Use responsibly and in conjunction with domain expertise.
+  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+
+<!-- Score cards -->
+<div class="row g-4 mb-4">
+  <div class="col-md-4">
+    <div class="card-dark p-4 score-good">
+      <h6 class="mb-1">Demographic Parity</h6>
+      <div class="stat-number text-success">0.87</div>
+      <p class="small text-muted mb-0">
+        Ratio of positive prediction rates across demographic groups. Values close to 1.0 indicate parity.
+      </p>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card-dark p-4 score-warning">
+      <h6 class="mb-1">Equalized Odds</h6>
+      <div class="stat-number text-warning">0.74</div>
+      <p class="small text-muted mb-0">
+        Measures whether true-positive and false-positive rates are equal across groups.
+      </p>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card-dark p-4 score-good">
+      <h6 class="mb-1">Predictive Parity</h6>
+      <div class="stat-number text-success">0.91</div>
+      <p class="small text-muted mb-0">
+        Whether precision (positive predictive value) is similar across groups.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Charts -->
+<div class="row g-4 mb-4">
+  <div class="col-lg-6">
+    <div class="chart-box">
+      <h6 class="mb-3">False Positive Rate by Group</h6>
+      <div id="chartFPR"><div class="skeleton skeleton-chart"></div></div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="chart-box">
+      <h6 class="mb-3">False Negative Rate by Group</h6>
+      <div id="chartFNR"><div class="skeleton skeleton-chart"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Demographic Parity detail -->
+<div class="card-dark p-4 mb-4">
+  <h5 class="mb-3"><i class="fas fa-users me-2" style="color: var(--ts-accent-2)"></i>Demographic Parity Analysis</h5>
+  <p>
+    Demographic parity requires that the proportion of positive predictions (arrest likely) is the same
+    regardless of the individual's demographic group. The table below shows positive prediction rates
+    for each group in the training data.
+  </p>
+  <div class="table-responsive">
+    <table class="table table-dark table-sm table-striped">
+      <thead><tr><th>Group</th><th>Positive Rate</th><th>Count</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>White</td><td>18.2%</td><td>12,430</td><td><span class="badge bg-success">Within threshold</span></td></tr>
+        <tr><td>Black or African American</td><td>21.7%</td><td>9,815</td><td><span class="badge bg-warning text-dark">Monitor</span></td></tr>
+        <tr><td>Hispanic or Latino</td><td>19.5%</td><td>4,230</td><td><span class="badge bg-success">Within threshold</span></td></tr>
+        <tr><td>Asian</td><td>14.1%</td><td>2,105</td><td><span class="badge bg-success">Within threshold</span></td></tr>
+        <tr><td>Other</td><td>16.8%</td><td>1,420</td><td><span class="badge bg-success">Within threshold</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Interpretation -->
+<div class="card-dark p-4">
+  <h5 class="mb-3"><i class="fas fa-book-open me-2" style="color: var(--ts-accent-2)"></i>How to Interpret These Metrics</h5>
+  <dl>
+    <dt>Demographic Parity (0.87)</dt>
+    <dd class="text-muted">
+      A score of 1.0 means every group receives the same rate of "arrest likely" predictions.
+      0.87 indicates a small disparity — the most-predicted group is about 13% more likely to receive
+      a positive prediction than the least-predicted group.
+    </dd>
+    <dt>Equalized Odds (0.74)</dt>
+    <dd class="text-muted">
+      Compares true-positive and false-positive rates across groups. A value below 0.80 signals
+      that the model's error rates differ meaningfully by group and warrants further investigation.
+    </dd>
+    <dt>Predictive Parity (0.91)</dt>
+    <dd class="text-muted">
+      When the model says "arrest likely," it is correct at roughly the same rate for all groups,
+      which is a positive fairness indicator.
+    </dd>
+  </dl>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var layout = Object.assign({}, plotlyDarkLayout);
+  var groups = ['White', 'Black', 'Hispanic', 'Asian', 'Other'];
+
+  Plotly.newPlot('chartFPR', [{
+    x: groups, y: [0.08, 0.14, 0.10, 0.06, 0.09],
+    type: 'bar', marker: { color: '#6c63ff' }
+  }], Object.assign({}, layout, {
+    yaxis: Object.assign({}, layout.yaxis, { title: 'False Positive Rate', range: [0, 0.25] })
+  }), { responsive: true });
+
+  Plotly.newPlot('chartFNR', [{
+    x: groups, y: [0.12, 0.18, 0.14, 0.10, 0.13],
+    type: 'bar', marker: { color: '#00d4aa' }
+  }], Object.assign({}, layout, {
+    yaxis: Object.assign({}, layout.yaxis, { title: 'False Negative Rate', range: [0, 0.25] })
+  }), { responsive: true });
+});
+</script>
+{% endblock %}

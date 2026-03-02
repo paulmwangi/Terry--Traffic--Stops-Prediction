@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Home – TerryStops-AI{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<section class="hero-section mb-4">
+  <h1 class="display-5 mb-2">TerryStops-AI</h1>
+  <p class="lead mb-4">Intelligent Terry Stop Outcome Prediction &amp; Analytics</p>
+  <a href="{{ url_for('predict.predict_form') }}" class="btn btn-accent btn-lg me-2">
+    <i class="fas fa-search me-1"></i>Make Prediction
+  </a>
+  <a href="{{ url_for('analytics.analytics') }}" class="btn btn-outline-accent btn-lg">
+    <i class="fas fa-chart-bar me-1"></i>View Dashboard
+  </a>
+</section>
+
+<!-- Stats cards -->
+<div class="row g-4 mb-4">
+  <div class="col-md-4">
+    <div class="card-dark p-4 text-center">
+      <div class="stat-number">{{ '{:,}'.format(stats.total_stops) }}</div>
+      <div class="stat-label"><i class="fas fa-database me-1"></i>Total Stops</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card-dark p-4 text-center">
+      <div class="stat-number">{{ stats.arrest_rate }}%</div>
+      <div class="stat-label"><i class="fas fa-handcuffs me-1"></i>Arrest Rate</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card-dark p-4 text-center">
+      <div class="stat-number">{{ stats.model_accuracy }}%</div>
+      <div class="stat-label"><i class="fas fa-bullseye me-1"></i>Model Accuracy</div>
+    </div>
+  </div>
+</div>
+
+<!-- Features -->
+<div class="row g-4 mb-4">
+  <div class="col-md-4">
+    <div class="card-dark p-4 text-center">
+      <i class="fas fa-brain fa-2x mb-3" style="color: var(--ts-accent)"></i>
+      <h6 class="fw-semibold">ML-Powered Predictions</h6>
+      <p class="small mb-0" style="color: var(--ts-muted)">Advanced machine learning models trained on real Seattle PD data for accurate outcome prediction.</p>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card-dark p-4 text-center">
+      <i class="fas fa-chart-pie fa-2x mb-3" style="color: var(--ts-accent-2)"></i>
+      <h6 class="fw-semibold">SHAP Explanations</h6>
+      <p class="small mb-0" style="color: var(--ts-muted)">Transparent, interpretable results with feature-level explanations for every prediction made.</p>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card-dark p-4 text-center">
+      <i class="fas fa-balance-scale fa-2x mb-3" style="color: var(--ts-accent)"></i>
+      <h6 class="fw-semibold">Fairness Monitoring</h6>
+      <p class="small mb-0" style="color: var(--ts-muted)">Built-in bias detection with demographic parity, equalized odds, and predictive parity metrics.</p>
+    </div>
+  </div>
+</div>
+
+<!-- About -->
+<div class="card-dark p-4">
+  <h5><i class="fas fa-info-circle me-2" style="color: var(--ts-accent-2)"></i>About This Application</h5>
+  <p class="mb-0" style="color: var(--ts-muted)">
+    TerryStops-AI uses machine-learning models trained on Seattle Police Department Terry Stop data
+    to predict whether a stop is likely to result in an arrest. The tool provides probability
+    estimates, SHAP-based explanations, and fairness metrics to support transparent, data-driven
+    policing decisions.
+  </p>
+</div>
+{% endblock %}

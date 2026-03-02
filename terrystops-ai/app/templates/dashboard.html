@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}Dashboard – TerryStops-AI{% endblock %}
+
+{% block content %}
+<h4 class="mb-3"><i class="fas fa-chart-bar me-2"></i>Dashboard</h4>
+
+<!-- Filters -->
+<div class="card-dark p-3 mb-4">
+  <div class="row g-2 align-items-end">
+    <div class="col-md-3">
+      <label class="form-label small">Start Date</label>
+      <input type="date" class="form-control form-control-sm bg-dark text-light border-secondary" id="filterStart">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label small">End Date</label>
+      <input type="date" class="form-control form-control-sm bg-dark text-light border-secondary" id="filterEnd">
+    </div>
+    <div class="col-md-2">
+      <button class="btn btn-accent btn-sm w-100" onclick="loadDashboard()">
+        <i class="fas fa-filter me-1"></i>Apply
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Charts -->
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="chart-box">
+      <h6 class="mb-3">Arrests by Hour of Day</h6>
+      <div id="chartHour"><div class="skeleton skeleton-chart"></div></div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="chart-box">
+      <h6 class="mb-3">Arrests by Race</h6>
+      <div id="chartRace"><div class="skeleton skeleton-chart"></div></div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="chart-box">
+      <h6 class="mb-3">Arrests by Precinct</h6>
+      <div id="chartPrecinct"><div class="skeleton skeleton-chart"></div></div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="chart-box">
+      <h6 class="mb-3">Weapon Presence vs Arrest Rate</h6>
+      <div id="chartWeapon"><div class="skeleton skeleton-chart"></div></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function loadDashboard() {
+  var url = '{{ url_for("analytics.analytics_data") }}';
+  fetch(url)
+    .then(function (r) { return r.json(); })
+    .then(function (d) { renderCharts(d); })
+    .catch(function () {
+      document.querySelectorAll('.chart-box div[id]').forEach(function (el) {
+        el.innerHTML = '<p class="text-muted text-center mt-4">Unable to load data.</p>';
+      });
+    });
+}
+
+function renderCharts(d) {
+  var layout = Object.assign({}, plotlyDarkLayout);
+
+  /* Hour */
+  if (d.by_hour && d.by_hour.length) {
+    var hours = d.by_hour.map(function (r) { return r.hour; });
+    var rates = d.by_hour.map(function (r) { return (r.arrest_rate * 100).toFixed(1); });
+    Plotly.newPlot('chartHour', [{
+      x: hours, y: rates, type: 'scatter', mode: 'lines+markers',
+      line: { color: '#6c63ff', width: 2 }, marker: { size: 6, color: '#00d4aa' }
+    }], Object.assign({}, layout, { xaxis: Object.assign({}, layout.xaxis, { title: 'Hour' }),
+      yaxis: Object.assign({}, layout.yaxis, { title: 'Arrest Rate (%)' }) }), { responsive: true });
+  }
+
+  /* Race */
+  if (d.by_race && d.by_race.length) {
+    var races = d.by_race.map(function (r) { return r.race; });
+    var rRates = d.by_race.map(function (r) { return (r.arrest_rate * 100).toFixed(1); });
+    Plotly.newPlot('chartRace', [{
+      y: races, x: rRates, type: 'bar', orientation: 'h',
+      marker: { color: 'rgba(108, 99, 255, 0.75)' }
+    }], Object.assign({}, layout, { xaxis: Object.assign({}, layout.xaxis, { title: 'Arrest Rate (%)' }) }),
+    { responsive: true });
+  }
+
+  /* Precinct */
+  if (d.by_precinct && d.by_precinct.length) {
+    var precs = d.by_precinct.map(function (r) { return r.precinct; });
+    var pRates = d.by_precinct.map(function (r) { return (r.arrest_rate * 100).toFixed(1); });
+    Plotly.newPlot('chartPrecinct', [{
+      x: precs, y: pRates, type: 'bar',
+      marker: { color: 'rgba(0, 212, 170, 0.7)' }
+    }], Object.assign({}, layout, { yaxis: Object.assign({}, layout.yaxis, { title: 'Arrest Rate (%)' }) }),
+    { responsive: true });
+  }
+
+  /* Weapon placeholder */
+  var wEl = document.getElementById('chartWeapon');
+  if (wEl) {
+    Plotly.newPlot('chartWeapon', [
+      { x: ['None', 'Firearm', 'Knife', 'Other'], y: [8, 42, 28, 15], name: 'Arrest Rate (%)', type: 'bar', marker: { color: '#6c63ff' } },
+      { x: ['None', 'Firearm', 'Knife', 'Other'], y: [92, 58, 72, 85], name: 'No Arrest (%)', type: 'bar', marker: { color: '#00d4aa' } }
+    ], Object.assign({}, layout, { barmode: 'group' }), { responsive: true });
+  }
+}
+
+document.addEventListener('DOMContentLoaded', loadDashboard);
+</script>
+{% endblock %}
